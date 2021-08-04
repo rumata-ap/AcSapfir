@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30717.126
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AcSapfir", "AcSapfir.csproj", "{FFA1ADBA-6C12-4883-9338-436751316614}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FFA1ADBA-6C12-4883-9338-436751316614}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFA1ADBA-6C12-4883-9338-436751316614}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFA1ADBA-6C12-4883-9338-436751316614}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFA1ADBA-6C12-4883-9338-436751316614}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FF8C0498-57B8-4D9A-A8D5-5F8F2C2173A8}
+	EndGlobalSection
+EndGlobal
