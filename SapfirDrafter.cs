@@ -115,6 +115,8 @@ namespace AcSapfir
             paramModelSpf.Parameter["M_MATERIAL"] = "ab7d2fa2-df44-4d8f-8d46-71b7fb919bde";
             paramModelSpf.RegenModel();
             AcUtilites.SetSapfirId(line, paramModelSpf.ID);
+            AcApp.DocumentManager.MdiActiveDocument.Editor.WriteMessage(
+                "\n  Стена ID={0}", paramModelSpf.ID);
         }
 
         void CreateLines(Line line, double _)
@@ -129,6 +131,8 @@ namespace AcSapfir
             polylineSpf.AddLine((int)Models3dTypes.TM3_LINE, buf1);
             paramModelSpf.RegenModel();
             AcUtilites.SetSapfirId(line, paramModelSpf.ID);
+            AcApp.DocumentManager.MdiActiveDocument.Editor.WriteMessage(
+                "\n  Линия ID={0}", paramModelSpf.ID);
         }
 
         /// <summary>
@@ -159,6 +163,8 @@ namespace AcSapfir
             paramModelSpf.Parameter["M_TYPE_LEVEL"] = "M_LEVEL_UP";
             paramModelSpf.RegenModel();
             AcUtilites.SetSapfirId(line, paramModelSpf.ID);
+            AcApp.DocumentManager.MdiActiveDocument.Editor.WriteMessage(
+                "\n  Плита ID={0}", paramModelSpf.ID);
         }
 
         /// <summary>
@@ -214,6 +220,8 @@ namespace AcSapfir
             paramModelSpf.Parameter["M_TYPE_LEVEL"] = "M_LEVEL_DN";
             paramModelSpf.RegenModel();
             AcUtilites.SetSapfirId(line, paramModelSpf.ID);
+            AcApp.DocumentManager.MdiActiveDocument.Editor.WriteMessage(
+                "\n  Фунд.плита ID={0}", paramModelSpf.ID);
         }
 
         /// <summary>
@@ -357,6 +365,8 @@ namespace AcSapfir
 
         void ResolveActiveContext()
         {
+            Editor acDocEd = AcApp.DocumentManager.MdiActiveDocument.Editor;
+
             var activeView = appSpf.GetActiveSapfirView();
             if (activeView != null)
                 docSpf = activeView.GetDocument();
@@ -376,6 +386,9 @@ namespace AcSapfir
                 storeySpf = projSpf.NewStorey("1-й этаж");
             else
                 storeySpf = docSpf.GetActiveStorey();
+
+            acDocEd.WriteMessage("\n[Sapfir] Активно: {0} / проект ID={1} / этажей: {2}",
+                docSpf.Title, projSpf.ID, projSpf.CountStorey);
         }
 
         // ─────────────────────────────────────────────────────────────
@@ -692,6 +705,8 @@ namespace AcSapfir
 
                     Entity writable = (Entity)acTrans.GetObject(acObjId, OpenMode.ForWrite);
                     AcUtilites.SetSapfirId(writable, column.ID);
+                    AcApp.DocumentManager.MdiActiveDocument.Editor.WriteMessage(
+                        "\n  Колонна ID={0}, угол={1:F1}°", column.ID, angle * 180.0 / Math.PI);
                 }
                 acTrans.Commit();
             }
