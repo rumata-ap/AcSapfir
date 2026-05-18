@@ -424,6 +424,50 @@ namespace AcSapfir
             AcUtilites.ActionOnLines(AcUtilites.Selection(), CreateAxes);
         }
 
+        [CommandMethod("Sapfir_AXES_WIZ", CommandFlags.UsePickSet)]
+        public void Sapfir_AXES_WIZ()
+        {
+            ResolveActiveContext();
+
+            ObjectId[] objIds = AcUtilites.Selection();
+            if (objIds == null) return;
+
+            var lines = new List<Autodesk.AutoCAD.DatabaseServices.Line>();
+            Database db = AcApp.DocumentManager.MdiActiveDocument.Database;
+            using (Transaction tr = db.TransactionManager.StartTransaction())
+            {
+                foreach (ObjectId id in objIds)
+                {
+                    Entity ent = (Entity)tr.GetObject(id, OpenMode.ForRead);
+                    if (ent is Autodesk.AutoCAD.DatabaseServices.Line line)
+                        lines.Add(line);
+                }
+                tr.Commit();
+            }
+
+            if (lines.Count == 0) return;
+
+            var form = new AxesWizardForm(lines);
+            Autodesk.AutoCAD.ApplicationServices.Application.ShowModalDialog(form);
+
+            if (form.Result == null || form.Result.Count == 0) return;
+
+            Editor acDocEd = AcApp.DocumentManager.MdiActiveDocument.Editor;
+            foreach (var item in form.Result)
+            {
+                var line = item.Item1;
+                string name = item.Item2;
+                buf1 = new object[]
+                {
+                    line.StartPoint.X * 0.001, line.StartPoint.Y * 0.001, 0,
+                    line.EndPoint.X * 0.001, line.EndPoint.Y * 0.001, 0
+                };
+                AutoObjDim axObj = storeySpf.NewModel((int)ModelsTypes.TM_DIMENSION);
+                axObj.SetDimParam((int)Models3dTypes.DIM_AXIS, (int)Models3dTypes.DIM_DIR_XY, name, buf1);
+                acDocEd.WriteMessage("\n  Ось {0}", name);
+            }
+        }
+
         [CommandMethod("Sapfir_Point_LOADS", CommandFlags.UsePickSet)]
         public void Sapfir_Point_LOADS()
         {
