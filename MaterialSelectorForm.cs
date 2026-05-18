@@ -122,7 +122,8 @@ namespace AcSapfir
                 {"ab7d2fa2-df44-4d8f-8d46-71b7fb919bde", "Бетон тяжёлый (стена)"},
                 {"79f404bd-50e9-4058-b664-c159ffdd0ce8", "Бетон тяжёлый (плита)"},
                 {"239d15bb-4253-4546-89f1-2d90300a3c79", "Бетон тяжёлый (фундамент)"},
-                {"bf0bce6b-c444-4d27-9b90-d0a38b6870b7", "Железобетон (колонна)"}
+                {"bf0bce6b-c444-4d27-9b90-d0a38b6870b7", "Железобетон (колонна)"},
+                {"25304e6e-8203-4968-b6fb-22b82250b55c", "Железобетон балок"}
             };
             foreach (var kvp in hardcoded)
                 items.Add(new MaterialItem { Guid = kvp.Key, Name = kvp.Value });
