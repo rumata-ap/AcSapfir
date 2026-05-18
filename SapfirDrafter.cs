@@ -675,6 +675,29 @@ namespace AcSapfir
             }
         }
 
+        [CommandMethod("Sapfir_STOREYS_WIZ", CommandFlags.Session)]
+        public void Sapfir_STOREYS_WIZ()
+        {
+            var form = new StoreyGeneratorForm(appSpf, docSpf);
+            Autodesk.AutoCAD.ApplicationServices.Application.ShowModalDialog(form);
+            if (form.Result == null || form.Result.Count == 0) return;
+
+            ResolveActiveContext();
+
+            var proj = docSpf.CountProjects > 0
+                ? docSpf.GetActiveProject()
+                : docSpf.NewProject();
+
+            while (proj.CountStorey > 0)
+                proj.DelStoreyByIndex(0);
+
+            foreach (var item in form.Result)
+            {
+                AutoStorey newStorey = proj.NewStorey(item.Item1);
+                newStorey.Parameter["M_LEVEL"] = item.Item2;
+            }
+        }
+
         [CommandMethod("Sapfir_test", CommandFlags.UsePickSet)]
         public void Sapfir_test()
         {
