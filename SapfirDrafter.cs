@@ -114,6 +114,21 @@ namespace AcSapfir
             paramModelSpf.Parameter["M_CR_LINE"] = 7369618;
             paramModelSpf.Parameter["M_MATERIAL"] = "ab7d2fa2-df44-4d8f-8d46-71b7fb919bde";
             paramModelSpf.RegenModel();
+            AcUtilites.SetSapfirId(line, paramModelSpf.ID);
+        }
+
+        void CreateLines(Line line, double _)
+        {
+            paramModelSpf = storeySpf.NewModel((int)ModelsTypes.TM_LINE);
+            polylineSpf = paramModelSpf.GetAxisLine();
+            buf1 = new object[]
+            {
+                line.StartPoint.X * 0.001, line.StartPoint.Y * 0.001, 0,
+                line.EndPoint.X * 0.001, line.EndPoint.Y * 0.001, 0
+            };
+            polylineSpf.AddLine((int)Models3dTypes.TM3_LINE, buf1);
+            paramModelSpf.RegenModel();
+            AcUtilites.SetSapfirId(line, paramModelSpf.ID);
         }
 
         /// <summary>
@@ -143,6 +158,7 @@ namespace AcSapfir
             paramModelSpf.Parameter["M_MATERIAL"] = "79f404bd-50e9-4058-b664-c159ffdd0ce8";
             paramModelSpf.Parameter["M_TYPE_LEVEL"] = "M_LEVEL_UP";
             paramModelSpf.RegenModel();
+            AcUtilites.SetSapfirId(line, paramModelSpf.ID);
         }
 
         /// <summary>
@@ -197,6 +213,7 @@ namespace AcSapfir
             paramModelSpf.Parameter["M_MATERIAL"] = "239d15bb-4253-4546-89f1-2d90300a3c79";
             paramModelSpf.Parameter["M_TYPE_LEVEL"] = "M_LEVEL_DN";
             paramModelSpf.RegenModel();
+            AcUtilites.SetSapfirId(line, paramModelSpf.ID);
         }
 
         /// <summary>
@@ -439,6 +456,66 @@ namespace AcSapfir
             if (result.Status == PromptStatus.OK) AcUtilites.ActionOnLines(AcUtilites.Selection(), CreateWalls, result.Value);
         }
 
+        [CommandMethod("Sapfir_LINES", CommandFlags.UsePickSet)]
+        public void Sapfir_LINES()
+        {
+            ResolveActiveContext();
+            AcUtilites.ActionOnLines(AcUtilites.Selection(), CreateLines, 0.0);
+        }
+
+        [CommandMethod("Sapfir_WALL_EDIT", CommandFlags.UsePickSet)]
+        public void Sapfir_WALL_EDIT()
+        {
+            ResolveActiveContext();
+            ObjectId[] objIds = AcUtilites.Selection();
+            if (objIds == null) return;
+
+            Database acCurDb = AcApp.DocumentManager.MdiActiveDocument.Database;
+            using (Transaction acTrans = acCurDb.TransactionManager.StartTransaction())
+            {
+                foreach (ObjectId acObjId in objIds)
+                {
+                    Entity acEnt = (Entity)acTrans.GetObject(acObjId, OpenMode.ForRead);
+                    int spfId = AcUtilites.GetSapfirId(acEnt);
+                    if (spfId == 0) continue;
+
+                    try
+                    {
+                        paramModelSpf = storeySpf.GetModelByID(spfId);
+                        polylineSpf = paramModelSpf.GetAxisLine();
+
+                        if (acEnt is Polyline polyline)
+                        {
+                            int n = polyline.NumberOfVertices;
+                            object[] coords = new object[n * 3];
+                            for (int i = 0; i < n; i++)
+                            {
+                                Point2d pt = polyline.GetPoint2dAt(i);
+                                coords[3 * i] = pt.X * 0.001;
+                                coords[3 * i + 1] = pt.Y * 0.001;
+                                coords[3 * i + 2] = 0.0;
+                            }
+                            polylineSpf.SetPoints(coords);
+                        }
+                        else if (acEnt is Line line)
+                        {
+                            buf1 = new object[]
+                            {
+                                line.StartPoint.X * 0.001, line.StartPoint.Y * 0.001, 0,
+                                line.EndPoint.X * 0.001, line.EndPoint.Y * 0.001, 0
+                            };
+                            polylineSpf.SetPoints(buf1);
+                        }
+                        else continue;
+
+                        paramModelSpf.RegenModel();
+                    }
+                    catch { }
+                }
+                acTrans.Commit();
+            }
+        }
+
         [CommandMethod("Sapfir_DOORS", CommandFlags.UsePickSet)]
         public void Sapfir_doors()
         {
@@ -612,6 +689,9 @@ namespace AcSapfir
                     column.Parameter["M_HEIGHT"] = storeyHeight;
                     column.Parameter["M_ANGLE"] = angle * 180.0 / Math.PI;
                     column.RegenModel();
+
+                    Entity writable = (Entity)acTrans.GetObject(acObjId, OpenMode.ForWrite);
+                    AcUtilites.SetSapfirId(writable, column.ID);
                 }
                 acTrans.Commit();
             }

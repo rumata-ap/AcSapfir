@@ -297,5 +297,40 @@ namespace AcSapfir
 
             return result.Trim();
         }
+
+        internal const string XDataAppName = "ACSAPFIR_ID";
+
+        internal static void SetSapfirId(Entity ent, int sapfirId)
+        {
+            Database db = ent.Database;
+            Transaction tr = db.TransactionManager.TopTransaction;
+            RegAppTable regAppTable = (RegAppTable)tr.GetObject(db.RegAppTableId, OpenMode.ForWrite);
+            if (!regAppTable.Has(XDataAppName))
+            {
+                RegAppTableRecord appRecord = new RegAppTableRecord();
+                appRecord.Name = XDataAppName;
+                regAppTable.Add(appRecord);
+                tr.AddNewlyCreatedDBObject(appRecord, true);
+            }
+
+            ResultBuffer rb = new ResultBuffer(
+                new TypedValue((int)DxfCode.ExtendedDataRegAppName, XDataAppName),
+                new TypedValue((int)DxfCode.ExtendedDataInteger32, sapfirId)
+            );
+            ent.XData = rb;
+        }
+
+        internal static int GetSapfirId(Entity ent)
+        {
+            ResultBuffer rb = ent.GetXDataForApplication(XDataAppName);
+            if (rb == null) return 0;
+            TypedValue[] values = rb.AsArray();
+            foreach (TypedValue tv in values)
+            {
+                if (tv.TypeCode == (int)DxfCode.ExtendedDataInteger32)
+                    return (int)tv.Value;
+            }
+            return 0;
+        }
     }
 }
