@@ -821,6 +821,85 @@ namespace AcSapfir
             }
         }
 
+        [CommandMethod("Sapfir_BEAMS", CommandFlags.UsePickSet)]
+        public void Sapfir_BEAMS()
+        {
+            ResolveActiveContext();
+            selectedMaterialGuid = SelectMaterial("Балки");
+            Editor acDocEd = AcApp.DocumentManager.MdiActiveDocument.Editor;
+
+            PromptDoubleResult hResult = acDocEd.GetDouble("\nВведите высоту сечения балки в метрах: ");
+            if (hResult.Status != PromptStatus.OK) return;
+            PromptDoubleResult bResult = acDocEd.GetDouble("\nВведите ширину сечения балки в метрах: ");
+            if (bResult.Status != PromptStatus.OK) return;
+
+            double h = hResult.Value;
+            double b = bResult.Value;
+
+            ObjectId[] objIds = AcUtilites.Selection();
+            if (objIds == null) return;
+
+            Database acCurDb = AcApp.DocumentManager.MdiActiveDocument.Database;
+            using (Transaction acTrans = acCurDb.TransactionManager.StartTransaction())
+            {
+                foreach (ObjectId acObjId in objIds)
+                {
+                    Entity acEnt = (Entity)acTrans.GetObject(acObjId, OpenMode.ForRead);
+                    if (!(acEnt is Line line)) continue;
+
+                    double cx = (line.StartPoint.X + line.EndPoint.X) * 0.0005;
+                    double cy = (line.StartPoint.Y + line.EndPoint.Y) * 0.0005;
+
+                    AutoModel beam = storeySpf.NewModel((int)ModelsTypes.TM_BEAM);
+                    beam.Parameter["M_POS_X"] = cx;
+                    beam.Parameter["M_POS_Y"] = cy;
+
+                    polylineSpf = beam.GetAxisLine();
+                    buf1 = new object[]
+                    {
+                        line.StartPoint.X * 0.001, line.StartPoint.Y * 0.001, 0,
+                        line.EndPoint.X * 0.001, line.EndPoint.Y * 0.001, 0
+                    };
+                    polylineSpf.SetPoints(buf1);
+
+                    var multiCont = beam.GetMultiContour();
+                    if (multiCont != null)
+                    {
+                        var cont = multiCont.GetContour();
+                        if (cont != null)
+                        {
+                            double hw = b * 0.5;
+                            double hh = h * 0.5;
+                            object[] secVerts = new object[]
+                            {
+                                -hw, -hh, 0.0,
+                                 hw, -hh, 0.0,
+                                 hw,  hh, 0.0,
+                                -hw,  hh, 0.0,
+                                -hw, -hh, 0.0
+                            };
+                            var pl = cont.NewPolyLine();
+                            pl.SetPoints(secVerts);
+                            pl.Closed = 0;
+                        }
+                        multiCont.Parameter["M_SIZE_GRO"] = 0;
+                        multiCont.Parameter["M_SIZE_GRC"] = 0;
+                        multiCont.AddToLibPrj();
+                    }
+
+                    if (selectedMaterialGuid != null)
+                        beam.Parameter["M_MATERIAL"] = selectedMaterialGuid;
+
+                    beam.RegenModel();
+
+                    Entity writable = (Entity)acTrans.GetObject(acObjId, OpenMode.ForWrite);
+                    AcUtilites.SetSapfirId(writable, beam.ID);
+                    acDocEd.WriteMessage("\n  Балка ID={0}, h={1:F2}м, b={2:F2}м", beam.ID, h, b);
+                }
+                acTrans.Commit();
+            }
+        }
+
         [CommandMethod("Sapfir_test", CommandFlags.UsePickSet)]
         public void Sapfir_test()
         {
