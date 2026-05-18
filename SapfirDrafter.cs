@@ -356,6 +356,7 @@ namespace AcSapfir
             };
             AutoObjDim axObj = storeySpf.NewModel((int)ModelsTypes.TM_DIMENSION);
             axObj.SetDimParam((int)Models3dTypes.DIM_AXIS, (int)Models3dTypes.DIM_DIR_XY, num.ToString(), buf1);
+            axObj.Parameter["M_MARK"] = num.ToString();
         }
 
         /// <summary>
@@ -464,6 +465,7 @@ namespace AcSapfir
                 };
                 AutoObjDim axObj = storeySpf.NewModel((int)ModelsTypes.TM_DIMENSION);
                 axObj.SetDimParam((int)Models3dTypes.DIM_AXIS, (int)Models3dTypes.DIM_DIR_XY, name, buf1);
+                axObj.Parameter["M_MARK"] = name;
                 acDocEd.WriteMessage("\n  Ось {0}", name);
             }
         }
