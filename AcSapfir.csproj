@@ -59,6 +59,7 @@
     <Compile Include="AcUtilites.cs" />
     <Compile Include="SapfirDrafter.cs" />
     <Compile Include="StoreyGeneratorForm.cs" />
+    <Compile Include="MaterialSelectorForm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

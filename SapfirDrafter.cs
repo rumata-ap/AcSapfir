@@ -8,6 +8,7 @@ using SapfirLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 
 [assembly: CommandClass(typeof(AcSapfir.SapfirDrafter))]
 
@@ -46,6 +47,24 @@ namespace AcSapfir
 
         /// <summary>Буфер для обмена координатами с SapfirLib.</summary>
         private object buf1;
+
+        /// <summary>Выбранный пользователем GUID материала для текущей команды.</summary>
+        private string selectedMaterialGuid;
+
+        string SelectMaterial(string elementType)
+        {
+            var form = new MaterialSelectorForm(docSpf, elementType);
+            Autodesk.AutoCAD.ApplicationServices.Application.ShowModalDialog(form);
+            if (form.DialogResult == System.Windows.Forms.DialogResult.OK && form.SelectedGuid != null)
+            {
+                selectedMaterialGuid = form.SelectedGuid;
+                AcApp.DocumentManager.MdiActiveDocument.Editor.WriteMessage(
+                    "\n  Материал: {0}", form.SelectedName);
+                return form.SelectedGuid;
+            }
+            selectedMaterialGuid = null;
+            return null;
+        }
 
         /// <summary>
         /// Инициализирует новый экземпляр класса <see cref="SapfirDrafter"/>.
@@ -112,7 +131,10 @@ namespace AcSapfir
             paramModelSpf.Parameter["M_CONSTYPE"] = "M_CTP_BEAR";
             paramModelSpf.Parameter["M_CR_FILL"] = 11854048;
             paramModelSpf.Parameter["M_CR_LINE"] = 7369618;
-            paramModelSpf.Parameter["M_MATERIAL"] = "ab7d2fa2-df44-4d8f-8d46-71b7fb919bde";
+            if (selectedMaterialGuid != null)
+                paramModelSpf.Parameter["M_MATERIAL"] = selectedMaterialGuid;
+            else
+                paramModelSpf.Parameter["M_MATERIAL"] = "ab7d2fa2-df44-4d8f-8d46-71b7fb919bde";
             paramModelSpf.RegenModel();
             AcUtilites.SetSapfirId(line, paramModelSpf.ID);
             AcApp.DocumentManager.MdiActiveDocument.Editor.WriteMessage(
@@ -159,7 +181,7 @@ namespace AcSapfir
             paramModelSpf.Parameter["M_CONSTYPE"] = "M_CTP_BEAR";
             paramModelSpf.Parameter["M_CR_FILL"] = 12832210;
             paramModelSpf.Parameter["M_CR_LINE"] = 2318692;
-            paramModelSpf.Parameter["M_MATERIAL"] = "79f404bd-50e9-4058-b664-c159ffdd0ce8";
+            paramModelSpf.Parameter["M_MATERIAL"] = selectedMaterialGuid ?? "79f404bd-50e9-4058-b664-c159ffdd0ce8";
             paramModelSpf.Parameter["M_TYPE_LEVEL"] = "M_LEVEL_UP";
             paramModelSpf.RegenModel();
             AcUtilites.SetSapfirId(line, paramModelSpf.ID);
@@ -216,7 +238,7 @@ namespace AcSapfir
             paramModelSpf.Parameter["M_CONSTYPE"] = "M_CTP_BEAR";
             paramModelSpf.Parameter["M_CR_FILL"] = 9876679;
             paramModelSpf.Parameter["M_CR_LINE"] = 2785991;
-            paramModelSpf.Parameter["M_MATERIAL"] = "239d15bb-4253-4546-89f1-2d90300a3c79";
+            paramModelSpf.Parameter["M_MATERIAL"] = selectedMaterialGuid ?? "239d15bb-4253-4546-89f1-2d90300a3c79";
             paramModelSpf.Parameter["M_TYPE_LEVEL"] = "M_LEVEL_DN";
             paramModelSpf.RegenModel();
             AcUtilites.SetSapfirId(line, paramModelSpf.ID);
@@ -437,6 +459,7 @@ namespace AcSapfir
         public void Sapfir_SLABS()
         {
             ResolveActiveContext();
+            selectedMaterialGuid = SelectMaterial("Плиты перекрытия");
             Editor acDocEd = AcApp.DocumentManager.MdiActiveDocument.Editor;
             PromptDoubleResult result = acDocEd.GetDouble("Введите толщину плит в метрах: ");
             if (result.Status == PromptStatus.OK) AcUtilites.ActionOnPolylines(AcUtilites.Selection(), CreateSlabs, result.Value);
@@ -455,6 +478,7 @@ namespace AcSapfir
         public void Sapfir_Found_SLABS()
         {
             ResolveActiveContext();
+            selectedMaterialGuid = SelectMaterial("Фундаментные плиты");
             Editor acDocEd = AcApp.DocumentManager.MdiActiveDocument.Editor;
             PromptDoubleResult result = acDocEd.GetDouble("Введите толщину фундаментных плит в метрах: ");
             if (result.Status == PromptStatus.OK) AcUtilites.ActionOnPolylines(AcUtilites.Selection(), CreateFoundSlabs, result.Value);
@@ -464,6 +488,7 @@ namespace AcSapfir
         public void Sapfir_WALLS()
         {
             ResolveActiveContext();
+            selectedMaterialGuid = SelectMaterial("Стены");
             Editor acDocEd = AcApp.DocumentManager.MdiActiveDocument.Editor;
             PromptDoubleResult result = acDocEd.GetDouble("Введите толщину стен в метрах: ");
             if (result.Status == PromptStatus.OK) AcUtilites.ActionOnLines(AcUtilites.Selection(), CreateWalls, result.Value);
@@ -582,6 +607,7 @@ namespace AcSapfir
         public void Sapfir_COLUMNS()
         {
             ResolveActiveContext();
+            selectedMaterialGuid = SelectMaterial("Колонны");
             Editor acDocEd = AcApp.DocumentManager.MdiActiveDocument.Editor;
 
             ObjectId[] objIds = AcUtilites.Selection();
@@ -700,6 +726,8 @@ namespace AcSapfir
                     }
 
                     column.Parameter["M_HEIGHT"] = storeyHeight;
+                    if (selectedMaterialGuid != null)
+                        column.Parameter["M_MATERIAL"] = selectedMaterialGuid;
                     column.Parameter["M_ANGLE"] = angle * 180.0 / Math.PI;
                     column.RegenModel();
 
