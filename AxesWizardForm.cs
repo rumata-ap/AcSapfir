@@ -26,6 +26,7 @@ namespace AcSapfir
             public NumericUpDown nudStartNum, nudStep;
             public TextBox txtPrefix, txtTemplate;
             public Label lblPreview;
+            public CheckBox chkReverse;
             public int Rule
             {
                 get { return cmbRule.SelectedIndex; }
@@ -70,8 +71,8 @@ namespace AcSapfir
             };
             Controls.Add(pnlGroups);
 
-            btnCancel = new Button { Text = "Отмена", Location = new Point(464, 460), Size = new Size(100, 30) };
-            btnCreate = new Button { Text = "Создать оси", Location = new Point(570, 460), Size = new Size(100, 30) };
+            btnCancel = new Button { Text = "Отмена", Location = new Point(444, 460), Size = new Size(100, 30) };
+            btnCreate = new Button { Text = "Создать оси", Location = new Point(550, 460), Size = new Size(100, 30) };
 
             btnCreate.Click += (s, e) => OnCreate();
             btnCancel.Click += (s, e) => Close();
@@ -156,7 +157,7 @@ namespace AcSapfir
                     Location = new Point(70, cy),
                     Size = new Size(160, 25),
                     DropDownStyle = ComboBoxStyle.DropDownList,
-                    Items = { "Буквы кириллицей", "Цифры", "Буквы + цифры", "Шаблон" },
+                    Items = { "Буквы кириллицей", "Цифры", "Буквы + цифры", "Шаблон", "Без маркировки" },
                     SelectedIndex = 0
                 };
                 group.cmbRule = cmbRule;
@@ -210,20 +211,33 @@ namespace AcSapfir
                 };
                 group.lblPreview = lblPrev;
 
+                var chkReverse = new CheckBox
+                {
+                    Text = "В обратном порядке",
+                    Location = new Point(10, cy + 55),
+                    Size = new Size(150, 25),
+                    Checked = false,
+                    Visible = true
+                };
+                chkReverse.CheckedChanged += (s, e) => UpdatePreview(group);
+                group.chkReverse = chkReverse;
+
                 cmbRule.SelectedIndexChanged += (s, e) =>
                 {
                     int rule = cmbRule.SelectedIndex;
+                    bool noMark = (rule == 4);
                     cmbLetter.Visible = (rule == 0 || rule == 3);
                     nudNum.Visible = (rule == 1 || rule == 2 || rule == 3);
-                    nudStep.Visible = (rule == 1);
+                    nudStep.Visible = (rule == 1) && !noMark;
                     lblPrefix.Visible = txtPrefix.Visible = false;
                     lblTemplate.Visible = txtTemplate.Visible = (rule == 3);
                     lblStart.Visible = (rule == 0 || rule == 3);
-                    lblStep.Visible = (rule == 1);
+                    lblStep.Visible = (rule == 1) && !noMark;
+                    chkReverse.Visible = !noMark;
                     UpdatePreview(group);
                 };
 
-                gbox.Controls.AddRange(new Control[] { lblRule, cmbRule, lblStart, cmbLetter, nudNum, lblStep, nudStep, lblPrefix, txtPrefix, lblTemplate, txtTemplate, lblPrev });
+                gbox.Controls.AddRange(new Control[] { lblRule, cmbRule, lblStart, cmbLetter, nudNum, lblStep, nudStep, lblPrefix, txtPrefix, lblTemplate, txtTemplate, lblPrev, chkReverse });
                 pnlGroups.Controls.Add(gbox);
 
                 cmbRule_InitialState(group);
@@ -235,11 +249,13 @@ namespace AcSapfir
         void cmbRule_InitialState(LineGroup group)
         {
             int rule = group.Rule;
+            bool noMark = (rule == 4);
             group.cmbStartLetter.Visible = (rule == 0 || rule == 3);
             group.nudStartNum.Visible = (rule == 1 || rule == 2 || rule == 3);
-            group.nudStep.Visible = (rule == 1);
+            group.nudStep.Visible = (rule == 1) && !noMark;
             group.txtPrefix.Visible = false;
             group.txtTemplate.Visible = (rule == 3);
+            group.chkReverse.Visible = !noMark;
             UpdatePreview(group);
         }
 
@@ -290,13 +306,25 @@ namespace AcSapfir
                     names.Add(name);
                 }
             }
+            else if (rule == 4)
+            {
+                for (int i = 0; i < count; i++)
+                    names.Add("");
+            }
+
+            if (group.chkReverse != null && group.chkReverse.Checked)
+                names.Reverse();
+
             return names;
         }
 
         void UpdatePreview(LineGroup group)
         {
             var names = GenerateNames(group);
-            group.lblPreview.Text = "→ " + string.Join(", ", names);
+            if (group.Rule == 4)
+                group.lblPreview.Text = "→ без маркировки (" + names.Count + " осей)";
+            else
+                group.lblPreview.Text = "→ " + string.Join(", ", names);
         }
 
         void OnCreate()

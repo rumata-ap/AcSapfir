@@ -466,7 +466,7 @@ namespace AcSapfir
                 AutoObjDim axObj = storeySpf.NewModel((int)ModelsTypes.TM_DIMENSION);
                 axObj.SetDimParam((int)Models3dTypes.DIM_AXIS, (int)Models3dTypes.DIM_DIR_XY, name, buf1);
                 axObj.Parameter["M_MARK"] = name;
-                acDocEd.WriteMessage("\n  Ось {0}", name);
+                acDocEd.WriteMessage("\n  Ось {0}", string.IsNullOrEmpty(name) ? "(без маркировки)" : name);
             }
         }
 
@@ -516,8 +516,32 @@ namespace AcSapfir
         {
             ResolveActiveContext();
             Editor acDocEd = AcApp.DocumentManager.MdiActiveDocument.Editor;
-            PromptIntegerResult result = acDocEd.GetInteger("Введите идентификатор (ID) плиты для размещения отверстий: ");
-            if (result.Status == PromptStatus.OK) AcUtilites.ActionOnPolylines(AcUtilites.Selection(), CreateSlabHoles, result.Value);
+
+            PromptSelectionOptions slabOpts = new PromptSelectionOptions();
+            slabOpts.MessageForAdding = "Выберите полилинию плиты:";
+            slabOpts.SingleOnly = true;
+            PromptSelectionResult slabSel = acDocEd.GetSelection(slabOpts);
+            if (slabSel.Status != PromptStatus.OK || slabSel.Value == null) return;
+            ObjectId slabObjId = slabSel.Value.GetObjectIds()[0];
+
+            int slabId;
+            Database acCurDb = AcApp.DocumentManager.MdiActiveDocument.Database;
+            using (Transaction acTrans = acCurDb.TransactionManager.StartTransaction())
+            {
+                Entity slabEnt = (Entity)acTrans.GetObject(slabObjId, OpenMode.ForRead);
+                slabId = AcUtilites.GetSapfirId(slabEnt);
+                if (slabId == 0)
+                {
+                    acDocEd.WriteMessage("\nВыбранная полилиния не содержит ID плиты Sapfir.");
+                    return;
+                }
+                acDocEd.WriteMessage("\n  Плита ID={0}", slabId);
+            }
+
+            ObjectId[] holeIds = AcUtilites.Selection();
+            if (holeIds == null) return;
+
+            AcUtilites.ActionOnPolylines(holeIds, CreateSlabHoles, slabId);
         }
 
         [CommandMethod("Sapfir_Found_SLABS", CommandFlags.UsePickSet)]
@@ -642,10 +666,20 @@ namespace AcSapfir
             while (proj.CountStorey > 0)
                 proj.DelStoreyByIndex(0);
 
-            foreach (var item in sorted)
+            for (int i = 0; i < sorted.Count; i++)
             {
+                var item = sorted[i];
+                double level = item.Item2 * 0.001;
+                double height;
+
+                if (i < sorted.Count - 1)
+                    height = (sorted[i + 1].Item2 - item.Item2) * 0.001;
+                else
+                    height = 3.0;
+
                 AutoStorey newStorey = proj.NewStorey(item.Item1);
-                newStorey.Parameter["M_LEVEL"] = item.Item2 * 0.001;
+                newStorey.Parameter["M_LEVEL"] = level;
+                newStorey.Parameter["M_HEIGHT"] = height;
             }
         }
 
@@ -665,8 +699,7 @@ namespace AcSapfir
             kwOpts.AllowNone = true;
             PromptResult kwResult = acDocEd.GetKeywords(kwOpts);
 
-            bool manualAngle = false;
-            double manualAngleRad = 0;
+            double angleRad = 0;
 
             if (kwResult.Status == PromptStatus.OK && kwResult.StringResult == "TwoPoints")
             {
@@ -679,8 +712,7 @@ namespace AcSapfir
                 if (pt2.Status != PromptStatus.OK) return;
                 double dx = pt2.Value.X - pt1.Value.X;
                 double dy = pt2.Value.Y - pt1.Value.Y;
-                manualAngleRad = Math.Atan2(dy, dx);
-                manualAngle = true;
+                angleRad = Math.Atan2(dy, dx);
             }
 
             double storeyHeight = 3.0;
@@ -730,27 +762,7 @@ namespace AcSapfir
                         verts[3 * n + 2] = 0.0;
                     }
 
-                    double angle;
-                    if (manualAngle)
-                    {
-                        angle = manualAngleRad;
-                    }
-                    else
-                    {
-                        double maxSideLen = 0;
-                        angle = 0;
-                        for (int i = 0; i < n - 1; i++)
-                        {
-                            double dx = (double)verts[3 * (i + 1)] - (double)verts[3 * i];
-                            double dy = (double)verts[3 * (i + 1) + 1] - (double)verts[3 * i + 1];
-                            double len = Math.Sqrt(dx * dx + dy * dy);
-                            if (len > maxSideLen)
-                            {
-                                maxSideLen = len;
-                                angle = Math.Atan2(dy, dx);
-                            }
-                        }
-                    }
+                    double angle = angleRad;
 
                     AutoModel column = storeySpf.NewModel((int)ModelsTypes.TM_COLUMN);
                     column.Parameter["M_POS_X"] = cx;
@@ -860,10 +872,20 @@ namespace AcSapfir
             while (proj.CountStorey > 0)
                 proj.DelStoreyByIndex(0);
 
-            foreach (var item in form.Result)
+            for (int i = 0; i < form.Result.Count; i++)
             {
+                var item = form.Result[i];
+                double level = item.Item2;
+                double height;
+
+                if (i < form.Result.Count - 1)
+                    height = form.Result[i + 1].Item2 - item.Item2;
+                else
+                    height = 3.0;
+
                 AutoStorey newStorey = proj.NewStorey(item.Item1);
-                newStorey.Parameter["M_LEVEL"] = item.Item2;
+                newStorey.Parameter["M_LEVEL"] = level;
+                newStorey.Parameter["M_HEIGHT"] = height;
             }
         }
 
