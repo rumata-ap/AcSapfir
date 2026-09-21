@@ -1,0 +1,99 @@
+site_name: AcSapfir — документация
+site_description: Плагин AutoCAD 2020 для экспорта геометрии в САПФИР
+site_url: https://rumata-ap.github.io/AcSapfir/
+repo_url: https://github.com/rumata-ap/AcSapfir
+repo_name: rumata-ap/AcSapfir
+edit_uri: edit/master/docs/
+copyright: AcSapfir — плагин экспорта геометрии AutoCAD → САПФИР
+
+docs_dir: docs
+site_dir: site
+
+# Локальные рабочие заметки не попадают в сайт
+exclude_docs: |
+  superpowers/
+
+theme:
+  name: material
+  language: ru
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tooltips
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Тёмная тема
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Светлая тема
+
+plugins:
+  - search:
+      lang: ru
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Главная: index.md
+  - Начало работы:
+      - getting-started/requirements.md
+      - Установка и сборка: getting-started/install.md
+      - Быстрый старт: getting-started/quickstart.md
+  - Команды:
+      - commands/index.md
+      - Оси: commands/axes.md
+      - Нагрузки: commands/loads.md
+      - Плиты: commands/slabs.md
+      - Стены: commands/walls.md
+      - Проёмы: commands/openings.md
+      - Колонны: commands/columns.md
+      - Балки: commands/beams.md
+      - Линии построения: commands/lines.md
+      - Этажи: commands/storeys.md
+  - Руководства:
+      - guides/materials.md
+      - Мастер осей: guides/axes-wizard.md
+      - Генератор этажей: guides/storeys-generator.md
+      - Решение проблем: guides/troubleshooting.md
+  - Внутреннее устройство:
+      - internals/architecture.md
+      - XData-связь: internals/xdata.md
+      - Масштабирование координат: internals/scaling.md
+      - SapfirLib COM: internals/sapfir-lib.md
+  - Разработка:
+      - development/structure.md
+      - Новая команда: development/adding-command.md
+      - Конвенции: development/conventions.md

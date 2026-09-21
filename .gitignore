@@ -9,3 +9,6 @@ obj/
 # Local-only files (not tracked in the remote repository)
 /docs/superpowers/
 /AGENTS.md
+
+# MkDocs build output
+/site/
