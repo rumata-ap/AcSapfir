@@ -70,7 +70,9 @@ Add unmarked axes option, reverse axis numbering
 ```
 
 - В репозиторий попадают только исходники и документация. Не коммитьте: `bin/`, `obj/`, `site/`, `docs/superpowers/`, `AGENTS.md` (см. `.gitignore`).
-- Публикация документации: `python -m mkdocs gh-deploy --force` (ветка `gh-pages`).
+- Публикация документации выполняется автоматически: workflow [`.github/workflows/docs.yml`](https://github.com/rumata-ap/AcSapfir/blob/master/.github/workflows/docs.yml) собирает сайт в строгом режиме (`mkdocs build --strict`) и публикует его в ветку `gh-pages` при каждом пуше в `master`, затрагивающем `docs/**`, `mkdocs.yml` или `requirements.txt`.
+- Ручная публикация (когда нужно срочно, без ожидания CI): `python -m mkdocs gh-deploy --force`.
+- Версия MkDocs Material фиксируется в `requirements.txt`.
 
 ## Версионирование
 
