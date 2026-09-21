@@ -4,7 +4,7 @@ site_url: https://rumata-ap.github.io/AcSapfir/
 repo_url: https://github.com/rumata-ap/AcSapfir
 repo_name: rumata-ap/AcSapfir
 edit_uri: edit/master/docs/
-copyright: AcSapfir — плагин экспорта геометрии AutoCAD → САПФИР
+copyright: AcSapfir — плагин экспорта геометрии AutoCAD → САПФИР · Лицензия MIT
 
 docs_dir: docs
 site_dir: site

@@ -1,5 +1,7 @@
 # AcSapfir
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Плагин AutoCAD 2020 для экспорта геометрии в САПФИР.
 
 ## Требования
@@ -56,3 +58,11 @@ msbuild AcSapfir.csproj /t:Build /p:Configuration=Debug
 ```
 
 Результат: `bin\Debug\AcSapfir.dll`
+
+## Документация
+
+Полное руководство: <https://rumata-ap.github.io/AcSapfir/> (исходники документации — в `docs/`, сборка — MkDocs Material).
+
+## Лицензия
+
+Проект распространяется под лицензией [MIT](LICENSE): код можно свободно использовать, изменять и распространять, в том числе в коммерческих проектах, при сохранении текста лицензии и уведомления о копирайте.
