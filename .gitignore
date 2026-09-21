@@ -7,5 +7,5 @@ obj/
 *.dvb
 
 # Local-only files (not tracked in the remote repository)
-/docs/
+/docs/superpowers/
 /AGENTS.md
