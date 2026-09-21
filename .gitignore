@@ -5,3 +5,7 @@ obj/
 *.user
 .vs/
 *.dvb
+
+# Local-only files (not tracked in the remote repository)
+/docs/
+/AGENTS.md
