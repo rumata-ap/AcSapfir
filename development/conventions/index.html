@@ -1837,7 +1837,9 @@
 </code></pre></div>
 <ul>
 <li>В репозиторий попадают только исходники и документация. Не коммитьте: <code>bin/</code>, <code>obj/</code>, <code>site/</code>, <code>docs/superpowers/</code>, <code>AGENTS.md</code> (см. <code>.gitignore</code>).</li>
-<li>Публикация документации: <code>python -m mkdocs gh-deploy --force</code> (ветка <code>gh-pages</code>).</li>
+<li>Публикация документации выполняется автоматически: workflow <a href="https://github.com/rumata-ap/AcSapfir/blob/master/.github/workflows/docs.yml"><code>.github/workflows/docs.yml</code></a> собирает сайт в строгом режиме (<code>mkdocs build --strict</code>) и публикует его в ветку <code>gh-pages</code> при каждом пуше в <code>master</code>, затрагивающем <code>docs/**</code>, <code>mkdocs.yml</code> или <code>requirements.txt</code>.</li>
+<li>Ручная публикация (когда нужно срочно, без ожидания CI): <code>python -m mkdocs gh-deploy --force</code>.</li>
+<li>Версия MkDocs Material фиксируется в <code>requirements.txt</code>.</li>
 </ul>
 <h2 id="_7">Версионирование<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
 <p>Версия сборки задаётся в <code>Properties/AssemblyInfo.cs</code> (<code>AssemblyVersion</code>, <code>AssemblyFileVersion</code>). При значимых изменениях обновляйте обе строки и указывайте версию в описании релиза.</p>
