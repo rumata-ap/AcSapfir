@@ -97,3 +97,4 @@ nav:
       - development/structure.md
       - Новая команда: development/adding-command.md
       - Конвенции: development/conventions.md
+  - История изменений: changelog.md
